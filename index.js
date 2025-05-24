@@ -25,7 +25,7 @@ require("./routes/user.routes")(app);
 require("./routes/redeem.routes")(app);
 
 // Set the port
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Start the server
 app.listen(PORT, () => {
