@@ -141,7 +141,7 @@ exports.getTaroCardDetail = async (req, res) => {
         // ดึงข้อมูลจากฐานข้อมูล
         const card = await prisma.cards.findUnique({
             where: {
-                id: Number(card_id)
+                card_id: Number(card_id)
             }
         });
 
