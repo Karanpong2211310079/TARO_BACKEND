@@ -128,20 +128,39 @@ exports.AddTaroCard = async (req, res) => {
   }
 };
 exports.getTaroCardDetail = async (req, res) => {
-    const {card_id} = req.body;
+    try {
+        const { card_id } = req.body;
 
-    const Card = await prisma.cards.findUnique({
-        where: {
-            id: Number(card_id)
+        // ตรวจสอบ card_id
+        if (!card_id || isNaN(Number(card_id))) {
+            return res.status(400).send({
+                message: 'Invalid or missing card_id'
+            });
         }
-    });
-    if(!Card){
-        return res.status(404).send({
-            message: 'Taro Card Not Found'
-        })
+
+        // ดึงข้อมูลจากฐานข้อมูล
+        const card = await prisma.cards.findUnique({
+            where: {
+                id: Number(card_id)
+            }
+        });
+
+        if (!card) {
+            return res.status(404).send({
+                message: 'Tarot card not found'
+            });
+        }
+
+        return res.status(200).send({
+            message: 'Tarot card details retrieved successfully',
+            data: card
+        });
+
+    } catch (error) {
+        console.error('Error fetching tarot card detail:', error);
+        return res.status(500).send({
+            message: 'An error occurred while fetching tarot card details',
+            error: error.message
+        });
     }
-    return res.status(200).send({
-        message: 'Get Taro Card Detail Success',
-        data: Card
-    })
-}
+};
