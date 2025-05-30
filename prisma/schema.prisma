@@ -13,6 +13,7 @@ model users {
   name              String?      @db.VarChar(255)
   profile_image_url String?      @db.VarChar(255)
   token             Int?
+  role              user_role    @default(user)
   user_cards        user_cards[]
 }
 
@@ -37,4 +38,15 @@ model secret_codes {
   id      Int     @id @default(autoincrement())
   code    String  @db.VarChar(255)
   is_used Boolean @default(false)
+}
+
+model admin {
+  id       Int    @id @default(autoincrement())
+  username String @unique @db.VarChar(50)
+  password String @db.VarChar(255)
+}
+
+enum user_role {
+  user
+  admin
 }
