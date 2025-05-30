@@ -127,3 +127,21 @@ exports.AddTaroCard = async (req, res) => {
       });
   }
 };
+exports.getTaroCardDetail = async (req, res) => {
+    const {card_id} = req.body;
+
+    const Card = await prisma.cards.findUnique({
+        where: {
+            id: Number(card_id)
+        }
+    });
+    if(!Card){
+        return res.status(404).send({
+            message: 'Taro Card Not Found'
+        })
+    }
+    return res.status(200).send({
+        message: 'Get Taro Card Detail Success',
+        data: Card
+    })
+}

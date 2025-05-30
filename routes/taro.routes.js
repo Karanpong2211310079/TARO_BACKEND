@@ -12,6 +12,7 @@ module.exports = function (app) {
     });
     app.get("/taro-card", controller.getTaroCard);
     app.get("/taro-card/:id", controller.getTaroCardById);
+    app.get("/taro-detail", controller.getTaroCardDetail);
     app.post("/add-usercard", controller.AddTaroCard);
     app.post("/created-card", controller.createTaroCard);
 };
