@@ -1,44 +1,39 @@
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
-})
+});
+
 exports.login = async (req, res) => {
-  const { name, phone } = req.body;
+  const { name, password } = req.body;
 
   try {
-    if (!name || !phone) {
-      return res.status(400).send({ message: 'Name and phone are required.' });
+    if (!name || !password) {
+      return res.status(400).send({ message: 'Name and password are required.' });
     }
 
-    // หา user ที่มีเบอร์นี้
-    const existingUserByPhone = await prisma.users.findFirst({
-      where: { phone_number: phone },
-    });
-
-    if (existingUserByPhone) {
-      // ถ้าเจอเบอร์แล้ว เช็คว่าชื่อที่ส่งมาเหมือนกับใน DB หรือเปล่า
-      if (existingUserByPhone.name !== name) {
-        // ชื่อไม่ตรงกับเบอร์ที่มีอยู่ ไม่อนุญาต
-        return res.status(400).send({ message: 'Phone number is already registered with a different name.' });
-      }
-
-      // ถ้าชื่อและเบอร์ตรงกัน → login สำเร็จ
-      return res.status(200).send({ message: 'Login successful.', user: existingUserByPhone });
-    }
-
-    // ถ้าเบอร์ยังไม่เคยมีในระบบ → เช็คว่าชื่อซ้ำไหม (ชื่อซ้ำไม่ได้)
-    const existingUserByName = await prisma.users.findFirst({
+    // หา user จากชื่อก่อน
+    const existingUser = await prisma.users.findFirst({
       where: { name: name },
     });
-    if (existingUserByName) {
-      return res.status(400).send({ message: 'Name is already taken.' });
+
+    if (existingUser) {
+      // มี user แล้ว → ตรวจสอบ password
+      const isMatch = await bcrypt.compare(password, existingUser.phone_number); // phone_number แทน hashed password
+      if (!isMatch) {
+        return res.status(401).send({ message: 'Invalid credentials.' });
+      }
+
+      return res.status(200).send({ message: 'Login successful.', user: existingUser });
     }
 
-    // ถ้าไม่ซ้ำเลย → สร้าง user ใหม่ (สมัครใหม่)
+    // ยังไม่มี user → สร้างใหม่
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await prisma.users.create({
       data: {
         name: name,
-        phone_number: phone,
+        phone_number: hashedPassword, // เก็บ password แบบแฮชไว้ใน phone_number
       },
     });
 
