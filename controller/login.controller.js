@@ -3,16 +3,16 @@ const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 })
 exports.login = async (req, res) => {
-  const { name, phone } = req.body;
+  const { name, password } = req.body;
 
   try {
-    if (!name || !phone) {
+    if (!name || !password) {
       return res.status(400).send({ message: 'Name and phone are required.' });
     }
 
     // หา user ที่มีเบอร์นี้
     const existingUserByPhone = await prisma.users.findFirst({
-      where: { phone_number: phone },
+      where: { phone_number: password },
     });
 
     if (existingUserByPhone) {
@@ -38,7 +38,7 @@ exports.login = async (req, res) => {
     const newUser = await prisma.users.create({
       data: {
         name: name,
-        phone_number: phone,
+        phone_number: password,
       },
     });
 
